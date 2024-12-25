@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-4">
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4 text-success">Welcome Back!</h2>
+
+                    <!-- Display errors -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h5 class="alert-heading">Login Failed</h5>
+                            <p>Invalid Credentials. Please try again.</p>
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Username</label>
+                            <input type="text" class="form-control form-control-lg" placeholder="Enter your username" id="id_username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Password</label>
+                            <input type="password" class="form-control form-control-lg" placeholder="Enter your password" id="id_password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 btn-lg">Login</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'register_user' %}" class="text-decoration-none">Don’t have an account? Sign Up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

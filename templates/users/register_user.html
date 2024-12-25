@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4 text-success">Create Your Account</h2>
+
+                    <!-- Display errors -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h5 class="alert-heading">Please fix the following errors:</h5>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                    <li><strong>{{ field|capfirst }}</strong>: {{ errors|join:", " }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form.username.label_tag }}
+                            <input type="text" class="form-control form-control-lg" placeholder="Enter your username" id="id_username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email.label_tag }}
+                            <input type="email" class="form-control form-control-lg" placeholder="Enter your email" id="id_email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.password1.label_tag }}
+                            <input type="password" class="form-control form-control-lg" placeholder="Create a password" id="id_password1" name="password1" required>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.password2.label_tag }}
+                            <input type="password" class="form-control form-control-lg" placeholder="Confirm your password" id="id_password2" name="password2" required>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.role.label_tag }}
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="role" value="customer" id="role_customer" required>
+                                <label class="form-check-label" for="role_customer">Customer</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="role" value="admin" id="role_admin" required>
+                                <label class="form-check-label" for="role_admin">Admin</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 btn-lg">Sign Up</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'login' %}" class="text-decoration-none">Already have an account? Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

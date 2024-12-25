@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Dashboard{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4 text-success">Welcome, {{ user.username }}!</h2>
+                    <p class="text-center mb-3">Use the navigation links to browse books, view your cart, or track your orders.</p>
+                    <div class="d-flex justify-content-around mt-4">
+                        <a href="{% url 'book_list' %}" class="btn btn-outline-success btn-lg">Browse Books</a>
+                        <a href="{% url 'cart_view' %}" class="btn btn-outline-success btn-lg">View Cart</a>
+                        <a href="{% url 'order_history' %}" class="btn btn-outline-success btn-lg">Track Orders</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

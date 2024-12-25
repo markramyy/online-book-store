@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow border-0 w-100" style="max-width: 600px;">
+        <div class="card-body p-5">
+            <h2 class="text-center mb-4 text-success">Checkout</h2>
+
+            {% if success %}
+                <div class="alert alert-success text-center">
+                    {{ success }}
+                </div>
+                <div class="text-center">
+                    <a href="{% url 'order_history' %}" class="btn btn-primary btn-lg">View Order History</a>
+                </div>
+            {% elif error %}
+                <div class="alert alert-danger text-center">
+                    {{ error }}
+                </div>
+                <div class="text-center">
+                    <a href="{% url 'cart_view' %}" class="btn btn-secondary btn-lg">Go to Cart</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Books{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Search and Filter Section -->
+        <div class="col-12 mb-4">
+            <h2 class="text-success text-center mb-4">Browse Books</h2>
+            <form method="get" class="d-flex gap-3 flex-wrap justify-content-center">
+                <input type="text" name="q" placeholder="Search by title or author" value="{{ request.GET.q }}" class="form-control w-50">
+                <select name="category" class="form-select w-auto">
+                    <option value="">All Categories</option>
+                    {% for key, value in categories %}
+                        <option value="{{ key }}" {% if request.GET.category == key %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+                <select name="sort_by" class="form-select w-auto">
+                    <option value="">Sort By</option>
+                    <option value="price" {% if request.GET.sort_by == "price" %}selected{% endif %}>Price: Low to High</option>
+                    <option value="-price" {% if request.GET.sort_by == "-price" %}selected{% endif %}>Price: High to Low</option>
+                    <option value="popularity" {% if request.GET.sort_by == "popularity" %}selected{% endif %}>Popularity: Low to High</option>
+                    <option value="-popularity" {% if request.GET.sort_by == "-popularity" %}selected{% endif %}>Popularity: High to Low</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Apply</button>
+            </form>
+        </div>
+
+        <!-- Book List Section -->
+        <div class="col-12">
+            <div class="row">
+                {% for book in books %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">{{ book.title }}</h5>
+                                <p class="card-text"><strong>Author:</strong> {{ book.author }}</p>
+                                <p class="card-text">
+                                    <del>${{ book.price }}</del>
+                                    <span class="text-success">${{ book.final_price|floatformat:2 }}</span>
+                                </p>
+                                <h6 class="mt-3">Reviews:</h6>
+                                <ul class="list-unstyled mb-3">
+                                    {% for review in book.review_set.all %}
+                                        <li>
+                                            <strong>{{ review.user.username }}</strong> rated {{ review.rating }}/5: {{ review.review_text }}
+                                        </li>
+                                    {% empty %}
+                                        <li>No reviews yet</li>
+                                    {% endfor %}
+                                </ul>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'add_review' book.id %}" class="btn btn-secondary btn-sm">Add Review</a>
+                                    <button class="btn btn-success btn-sm add-to-cart-btn" data-book-id="{{ book.id }}">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-center">No books found.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="col-12">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if books.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="First">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ books.previous_page_number }}" aria-label="Previous">Previous</a>
+                        </li>
+                    {% endif %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Page {{ books.number }} of {{ books.paginator.num_pages }}</span>
+                    </li>
+                    {% if books.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ books.next_page_number }}" aria-label="Next">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ books.paginator.num_pages }}" aria-label="Last">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Create the popup container
+        const popupContainer = document.createElement('div');
+        popupContainer.id = 'popup-container';
+        popupContainer.style.position = 'fixed';
+        popupContainer.style.top = '50%';
+        popupContainer.style.left = '50%';
+        popupContainer.style.transform = 'translate(-50%, -50%)';
+        popupContainer.style.backgroundColor = '#4CAF50';
+        popupContainer.style.color = '#fff';
+        popupContainer.style.padding = '20px';
+        popupContainer.style.borderRadius = '10px';
+        popupContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+        popupContainer.style.display = 'none';
+        popupContainer.style.zIndex = '1000';
+        document.body.appendChild(popupContainer);
+
+        const showPopup = (message, success = true) => {
+            popupContainer.textContent = message;
+            popupContainer.style.backgroundColor = success ? '#4CAF50' : '#f44336';
+            popupContainer.style.display = 'block';
+
+            setTimeout(() => {
+                popupContainer.style.display = 'none';
+            }, 3000); // 3 seconds
+        };
+
+        document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const bookId = e.target.dataset.bookId;
+
+                try {
+                    const response = await fetch("{% url 'add_to_cart_ajax' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                        },
+                        body: new URLSearchParams({ book_id: bookId, quantity: 1 }),
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        showPopup(data.message, true);
+                    } else {
+                        showPopup(data.message, false);
+                    }
+                } catch (error) {
+                    showPopup('An error occurred. Please try again.', false);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
